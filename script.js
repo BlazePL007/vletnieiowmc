@@ -8,9 +8,13 @@ async function loadSheetData() {
     const rows = csvText.trim().split('\n').map(row => row.split(','));
     const dataMap = new Map();
 
-    rows.forEach(([country, note]) => {
+    rows.forEach(([country, note, debiut]) => {
       if (country && note) {
-        dataMap.set(country.trim(), note.trim());
+        let fullNote = note.trim();
+        if(debiut && debiut.trim() !== ''){
+          fullNote +=` (${debiut.trim()})`;
+        }
+        dataMap.set(country.trim(), fullNote);
       }
     });
 
