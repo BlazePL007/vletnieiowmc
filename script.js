@@ -14,14 +14,20 @@ async function loadSheetData() {
         if(debiut && debiut.trim() !== ''){
           fullNote +=` (${debiut.trim()})`;
         }
-        dataMap.set(country.trim(), fullNote);
+        country = country.trim();
+      if (!dataMap.has(country)) {
+        dataMap.set(country, []);
+      }
+
+      dataMap.get(country).push(fullNote);
       }
     });
 
     document.querySelectorAll('span').forEach(span => {
       const country = span.textContent.trim();
       if (dataMap.has(country)) {
-        span.textContent += ` (${dataMap.get(country)})`;
+        const allNotes = dataMap.get(country).join(', ');
+        span.innerHTML = `${country}<br>(${allNotes})`;
       }
     });
   } catch (error) {
