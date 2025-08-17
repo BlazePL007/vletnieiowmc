@@ -155,3 +155,44 @@ ul.list{
     color: #555;
     font-size: 0.9rem;
 }
+
+table.kalendarz{
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 14px;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-top: 1.5em;
+}
+
+table.kalendarz th,table.kalendarz td{
+    border: 1px solid #ccc;
+    padding: 4px 6px;
+    font-size: 1.05em;
+}
+
+table.kalendarz th{
+    background-color: #3498db;
+    color: white;
+}
+
+.otwarcie{
+    background: rgb(32, 212, 32);
+}
+
+.medale{
+    background: orange;
+}
+
+.zakonczenie{
+    background: red;
+}
+
+.zawody{
+    background: lightskyblue;
+}
+
+.finaly{
+    background: yellow;
+}
