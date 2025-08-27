@@ -226,3 +226,42 @@ table.kalendarz th{
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-top: 1.5em;
 }
+
+#medal-table{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.75em 1em;
+}
+
+.medal-table{
+    border-collapse: collapse;
+    text-align: center;
+    width: 100%;
+    background-color:white;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+    margin-top:1.5em;
+}
+
+.medal-table th, .medal-table td{
+    border:1px solid #ccc;
+    padding:0.75em 1em;
+    font-size: 1.05em;
+}
+
+.medal-table th{
+    background-color:#3498db;
+    color:white
+}
+
+.medal-table td:nth-child(3){
+    background-color:gold;
+}
+
+.medal-table td:nth-child(4){
+    background-color:silver;
+}
+
+.medal-table td:nth-child(5){
+    background-color:#977547;
+}

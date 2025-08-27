@@ -65,7 +65,6 @@ async function loadMedals(sheetUrl2) {
     const doc = parser.parseFromString(htmlText, 'text/html');
 
     const rows = Array.from(doc.querySelectorAll('table tr'));
-//    rows.shift();
 
     let medalTable = {};
 
@@ -75,8 +74,6 @@ async function loadMedals(sheetUrl2) {
       let silver = cells[1]?.textContent.trim();
       let bronze = cells[2]?.textContent.trim();
       
-      console.log(`gold=${gold}, silver=${silver}, bronze=${bronze}`);
-
       if (gold) assignMedal(gold, "gold", medalTable);
       if (silver) assignMedal(silver, "silver", medalTable);
       if (bronze) assignMedal(bronze, "bronze", medalTable);
@@ -98,16 +95,15 @@ async function loadMedals(sheetUrl2) {
 function assignMedal(player, type, medalTable) {
   let country = window.playerCountryMap[player] || "Nieznany kraj";
 
-  if (!medalTable[country]) {
-    medalTable[country] = { 
-      country, 
+  if (!medalTable[player]) {
+    medalTable[player] = { 
+      player, 
       gold: 0, silver: 0, bronze: 0,
-      players: []
+      country
     };
   }
 
-  medalTable[country][type]++;
-  medalTable[country].players.push({ player, medal: type });
+  medalTable[player][type]++;
 }
 
 function renderMedalTable(data) {
@@ -120,20 +116,23 @@ function renderMedalTable(data) {
   table.innerHTML = `
     <thead>
       <tr>
-        <th>Kraj</th>
+        <th>Pozycja w Klasyfikacji</th>
+        <th>Zawodnik</th>
         <th>Złote</th>
         <th>Srebrne</th>
         <th>Brązowe</th>
-        <th>Zawodnicy</th>
+        <th>Razem</th>
       </tr>
     </thead>
     <tbody>
-      ${data.map(row => `
+      ${data.map((row, i) => `
         <tr>
-          <td>${row.country}(${row.players.player})</td>
+          <td>${i + 1}</td>
+          <td>${row.country}(${row.player})</td>
           <td>${row.gold}</td>
           <td>${row.silver}</td>
           <td>${row.bronze}</td>
+          <td>${row.gold + row.silver + row.bronze}</td>
         </tr>
       `).join("")}
     </tbody>
