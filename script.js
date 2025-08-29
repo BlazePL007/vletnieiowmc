@@ -141,5 +141,9 @@ function renderMedalTable(data) {
   container.appendChild(table);
 }
 
-loadSheetData();
-loadMedals(sheetUrl2);
+async function init() {
+  await loadSheetData();
+  await loadMedals(sheetUrl2);
+}
+
+init();
