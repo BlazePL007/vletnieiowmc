@@ -2,6 +2,8 @@ const sheetUrl = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50uL
 
 const sheetUrl2 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50uLXxdeKPCZKJHmC2xRA2SD-sUxC_qtivRPhvX2JTYQvvyNZhZ4yYtpDHB-3KmcPEpy-DoWv/pubhtml/sheet?headers=false&gid=635160100';
 
+const sheetUrl3 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50uLXxdeKPCZKJHmC2xRA2SD-sUxC_qtivRPhvX2JTYQvvyNZhZ4yYtpDHB-3KmcPEpy-DoWv/pubhtml/sheet?headers=false&gid=287910486';
+
 async function preloadSheetData() {
   try {
     const res = await fetch(sheetUrl);
@@ -169,6 +171,7 @@ async function loadSection(name) {
     }
   }
 }
+
 async function preloadSections(names) {
   for (const name of names) {
     if (!cache[name]) {
@@ -178,11 +181,91 @@ async function preloadSections(names) {
   }
 }
 
+async function loadRecords(sheetUrl3) {
+  try{
+    const res = await fetch(sheetUrl3);
+    const htmlText = await res.text();
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+
+    const rows = Array.from(doc.querySelectorAll('table tr'));
+
+    let records = {}
+
+    rows.forEach(row =>{
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+      let data = cells[0].textContent.trim();
+      let Dyscyplina = cells[1].textContent.trim();
+      let konkurencja = cells[2].textContent.trim();
+      let faza = cells[3].textContent.trim();
+      let zawodnik = cells[4].textContent.trim();
+      let rekord = cells[5].textContent.trim();
+      let jednostka = cells[6].textContent.trim();
+
+      let country = window.playerCountryMap[zawodnik] || "Nieznany kraj";
+
+      if(!records[`${Dyscyplina} ${konkurencja}`])
+        records[`${Dyscyplina} ${konkurencja}`] = {
+          data,
+          Dyscyplina,
+          konkurencja,
+          faza,
+          zawodnicy:[],
+          rekord,
+          jednostka
+        }
+      records[`${Dyscyplina} ${konkurencja}`].zawodnicy.push(`${country}(${zawodnik})`)
+
+      }
+    });
+
+    renderRecordTable(Object.values(records), "rekordy")
+  }catch(error){
+    console.error("Błąd podczas ładowania rekordów:", error);
+  }
+}
+
+function renderRecordTable(data, sectionName) {
+  const dom = new DOMParser().parseFromString(cache[sectionName], "text/html");
+  const container = dom.getElementById("record-table");
+  container.innerHTML = "";
+  console.log(data);
+  let table = dom.createElement("table");
+  table.className = "record-table";
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Zawody</th>
+        <th>Zawodnicy</th>
+        <th>Rekord</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${data.map(row => `
+        <tr>
+          <td>${row.data}</td>
+          <td><img src="${row.Dyscyplina}.png" width="50" style="vertical-align: middle;">${row.Dyscyplina} (${row.konkurencja} - ${row.faza})</td>
+          <td>${row.zawodnicy.map(zawodnik => `${zawodnik}`).join("<br>")}</td>
+          <td>${row.rekord} ${row.jednostka}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+  `;
+
+  container.appendChild(table);
+  cache[sectionName] = dom.body.innerHTML;
+}
+
 async function init() {
   document.getElementById("content").innerHTML = "<p>Ładowanie...</p>";
-  await preloadSections(["wstęp", "dyscypliny", "panstwa", "symbole", "medale", "obiekty", "harmonogram", "zaprzyjaźnieni"]);
+  await preloadSections(["wstęp", "dyscypliny", "panstwa", "symbole", "medale", "rekordy", "obiekty", "harmonogram", "zaprzyjaźnieni"]);
   await preloadSheetData();
   await loadMedals(sheetUrl2);
+  await loadRecords(sheetUrl3);
   await loadSection("wstęp")
 }
 
