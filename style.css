@@ -278,6 +278,10 @@ table.kalendarz th{
     font-size: 1.05em;
 }
 
+.medal-table td{
+    border-bottom: none;
+}
+
 .medal-table th{
     background-color:#3498db;
     color:white
@@ -319,4 +323,51 @@ table.kalendarz th{
 .record-table th{
     background-color:#3498db;
     color:white
+}
+
+.details-row {
+  background: #fafafa;
+}
+
+.details-content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+.details-row.open .details-content {
+    border-top: 1px solid #ccc;
+  max-height: 500px; /* wystarczająco dużo, żeby pomieściło listę */
+  opacity: 1;
+}
+
+.details-row td {
+    border-top: none;
+    padding: 0; /* usuwa domyślne paddingi, żeby animacja mogła schować wiersz całkowicie */
+}
+
+/* .hidden {
+  display: none;
+} */
+
+.player-row {
+  cursor: pointer;
+}
+
+.details-row ul {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; /* jak się nie mieści w jednym rzędzie, zawija */
+  gap: 10px; /* odstęp między medalami */
+  padding: 8px;
+  margin: 0;
+  list-style: none;
+}
+
+.details-row li {
+  background: #eee;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.9em;
 }

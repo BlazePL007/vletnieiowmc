@@ -82,10 +82,18 @@ async function loadMedals(sheetUrl2) {
       let gold = cells[0]?.textContent.trim();
       let silver = cells[1]?.textContent.trim();
       let bronze = cells[2]?.textContent.trim();
+
+      let dyscyplina = cells[4]?.textContent.trim();
+      let konkurencja = cells[5]?.textContent.trim();
       
-      if (gold) assignMedal(gold, "gold", medalTable);
-      if (silver) assignMedal(silver, "silver", medalTable);
-      if (bronze) assignMedal(bronze, "bronze", medalTable);
+      let competition = dyscyplina;
+      if (konkurencja) {
+        competition += ` (${konkurencja})`;
+      }
+
+      if (gold) assignMedal(gold, "gold", medalTable, competition);
+      if (silver) assignMedal(silver, "silver", medalTable, competition);
+      if (bronze) assignMedal(bronze, "bronze", medalTable, competition);
     });
 
     let sorted = Object.values(medalTable).sort((a, b) => {
@@ -101,18 +109,20 @@ async function loadMedals(sheetUrl2) {
   }
 }
 
-function assignMedal(player, type, medalTable) {
+function assignMedal(player, type, medalTable, competition) {
   let country = window.playerCountryMap[player] || "Nieznany kraj";
 
   if (!medalTable[player]) {
     medalTable[player] = { 
       player, 
       gold: 0, silver: 0, bronze: 0,
-      country
+      country,
+      medals:[]
     };
   }
 
   medalTable[player][type]++;
+  medalTable[player].medals.push({type, competition});
 }
 
 function renderMedalTable(data, sectionName) {
@@ -135,21 +145,51 @@ function renderMedalTable(data, sectionName) {
       </tr>
     </thead>
     <tbody>
-      ${data.map((row, i) => `
-        <tr>
+      ${data.map((row, i) => {
+        const sortedMedals = row.medals.sort((a, b) => {
+          const order = { gold: 1, silver: 2, bronze: 3 };
+          return order[a.type] - order[b.type];
+        });
+        
+        return `
+        <tr class="player-row" data-player="${row.player}">
           <td>${i + 1}</td>
-          <td>${row.country}(${row.player})</td>
+          <td>${row.country} (${row.player})</td>
           <td>${row.gold}</td>
           <td>${row.silver}</td>
           <td>${row.bronze}</td>
           <td>${row.gold + row.silver + row.bronze}</td>
         </tr>
-      `).join("")}
+        <tr class="details-row" id="details-${row.player}">
+          <td colspan="6">
+            <div class="details-content">
+              <ul>
+                ${sortedMedals.map(m => `
+                    <li><strong>${m.type.toUpperCase()}:</strong> ${m.competition}</li>
+                  `).join("")}
+              </ul>
+            </div>
+          </td>
+        </tr>
+      `}).join("")}
     </tbody>
   `;
 
   container.appendChild(table);
   cache[sectionName] = dom.body.innerHTML;
+}
+
+function activateMedalTableEvents() {
+  // teraz bierzemy już "żywy" DOM
+  const container = document.getElementById("medal-table");
+  if (!container) return;
+
+  container.querySelectorAll(".player-row").forEach(row => {
+    row.addEventListener("click", () => {
+      const details = container.querySelector("#details-" + row.dataset.player);
+      if (details) details.classList.toggle("open");
+    });
+  });
 }
 
 let actualnapostrona = "";
@@ -166,6 +206,10 @@ async function loadSection(name) {
         document.getElementById("content").innerHTML = html;
       }
       actualnapostrona = name;
+
+      if(name==="medale"){
+        activateMedalTableEvents();
+      }
     } catch (error) {
       console.error("Błąd ładowania sekcji:", error);
     }
@@ -231,7 +275,6 @@ function renderRecordTable(data, sectionName) {
   const dom = new DOMParser().parseFromString(cache[sectionName], "text/html");
   const container = dom.getElementById("record-table");
   container.innerHTML = "";
-  console.log(data);
   let table = dom.createElement("table");
   table.className = "record-table";
 
