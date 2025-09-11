@@ -304,7 +304,6 @@ function renderRecordTable(data, sectionName) {
 }
 
 async function init() {
-  document.getElementById("content").innerHTML = "<p>Ładowanie...</p>";
   await preloadSections(["wstęp", "dyscypliny", "panstwa", "symbole", "medale", "rekordy", "obiekty", "harmonogram", "zaprzyjaźnieni"]);
   await preloadSheetData();
   await loadMedals(sheetUrl2);

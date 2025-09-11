@@ -371,3 +371,96 @@ table.kalendarz th{
   border-radius: 6px;
   font-size: 0.9em;
 }
+
+.loading{
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 20vh;
+    gap:60px;
+}
+
+.rings{
+    position: relative;
+    width: 140px;
+    height: 140px;
+}
+
+.rings::before{
+    content: "";
+    position: absolute;
+    left:50%;
+    top:50%;
+    width: 10px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+    box-shadow: 
+        32px 0px 0 0 #1e6fe0,
+        10px -30px 0 0 #f3c434,
+        -26px -20px 0 0 #222222,
+        -26px 20px 0 0 #28b463,
+        10px 30px 0 0 #e74c3c;
+    animation: spin 1.4s linear infinite;
+    image-rendering: pixelated;     
+}
+
+@keyframes spin{
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.torch{
+      position: relative;
+      width: 16px; /* szerokość 2 pikseli */
+      height: 64px; /* wysokość drewna */
+    }
+
+    /* drewno 2x8 pikseli */
+    .torch::before{
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background: #6b4b2a;
+      /* każdy cień = jeden piksel */
+      box-shadow:
+        8px   0px #7d5630,
+        0px  -8px #8b5e33,
+        8px  -8px #5a3b1d,
+        0px -16px #7d5630,
+        8px -16px #6b4b2a,
+        0px -24px #5a3b1d,
+        8px -24px #8b5e33,
+        0px -32px #6b4b2a,
+        8px -32px #7d5630,
+        0px -40px #8b5e33,
+        8px -40px #5a3b1d,
+        0px -48px #7d5630,
+        8px -48px #6b4b2a,
+        0px -56px #8b5e33,
+        8px -56px #5a3b1d;
+      image-rendering: pixelated;
+    }
+
+    /* ogień 2x2 piksele */
+    .torch::after{
+      content: "";
+      position: absolute;
+      bottom: 64px; /* nad drewnem */
+      left: 0;
+      width: 8px;
+      height: 8px;
+      background: #ff9933;
+      box-shadow:
+        8px 0px #ffd633,
+        0px -8px #fff176,
+        8px -8px #ffa31a;
+      animation: flicker 0.6s infinite;
+    }
+
+    @keyframes flicker{
+      0%,100%{ transform: scale(1); opacity: 1; }
+      50%{ transform: scale(1.2); opacity: 0.85; }
+    }
