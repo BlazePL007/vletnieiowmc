@@ -377,7 +377,7 @@ table.kalendarz th{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 20vh;
+    height: 30vh;
     gap:60px;
 }
 
