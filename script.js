@@ -244,9 +244,9 @@ async function loadRecords(sheetUrl3) {
       let Dyscyplina = cells[1].textContent.trim();
       let konkurencja = cells[2].textContent.trim();
       let faza = cells[3].textContent.trim();
-      let zawodnik = cells[4].textContent.trim();
-      let rekord = cells[5].textContent.trim();
-      let jednostka = cells[6].textContent.trim();
+      let zawodnik = cells[4]?.textContent.trim();
+      let rekord = cells[5]?.textContent.trim();
+      let jednostka = cells[6]?.textContent.trim();
 
       let country = window.playerCountryMap[zawodnik] || "Nieznany kraj";
 
@@ -260,7 +260,8 @@ async function loadRecords(sheetUrl3) {
           rekord,
           jednostka
         }
-      records[`${Dyscyplina} ${konkurencja}`].zawodnicy.push(`${country}(${zawodnik})`)
+      if(zawodnik)
+        records[`${Dyscyplina} ${konkurencja}`].zawodnicy.push(`${country}(${zawodnik})`)
 
       }
     });
