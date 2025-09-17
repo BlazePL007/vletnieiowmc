@@ -4,6 +4,58 @@ const sheetUrl2 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50u
 
 const sheetUrl3 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50uLXxdeKPCZKJHmC2xRA2SD-sUxC_qtivRPhvX2JTYQvvyNZhZ4yYtpDHB-3KmcPEpy-DoWv/pubhtml/sheet?headers=false&gid=287910486';
 
+const countryFlags = {
+  "Czad" :"https://flagcdn.com/td.svg",
+  "Madagaskar":"https://flagcdn.com/mg.svg",
+  "Niger":"https://flagcdn.com/ne.svg",
+  "Nigeria":"https://flagcdn.com/ng.svg",
+  "Albania":"https://flagcdn.com/al.svg",
+  "Austria":"https://flagcdn.com/at.svg",
+  "Belgia":"https://flagcdn.com/be.svg",
+  "Czechy":"https://flagcdn.com/cz.svg",
+  "Dania":"https://flagcdn.com/dk.svg",
+  "Estonia":"https://flagcdn.com/ee.svg",
+  "Finlandia":"https://flagcdn.com/fi.svg",
+  "Francja":"https://flagcdn.com/fr.svg",
+  "Grecja":"https://flagcdn.com/gr.svg",
+  "Hiszpania":"https://flagcdn.com/es.svg",
+  "Irlandia":"https://flagcdn.com/ie.svg",
+  "Kosowo":"https://upload.wikimedia.org/wikipedia/commons/1/1f/Flag_of_Kosovo.svg",
+  "Malta":"https://flagcdn.com/mt.svg",
+  "Niemcy":"https://flagcdn.com/de.svg",
+  "Niderlandy": "https://flagcdn.com/nl.svg",
+  "Norwegia":"https://flagcdn.com/no.svg",
+  "Polska": "https://flagcdn.com/pl.svg",
+  "Portugalia":"https://flagcdn.com/pt.svg",
+  "Serbia":"https://flagcdn.com/rs.svg",
+  "Szwajcaria":"https://flagcdn.com/ch.svg",
+  "Szwecja":"https://flagcdn.com/se.svg",
+  "Turcja":"https://flagcdn.com/tr.svg",
+  "Węgry":"https://flagcdn.com/hu.svg",
+  "Wielka Brytania": "https://flagcdn.com/gb.svg",
+  "Włochy": "https://flagcdn.com/it.svg",
+  "Watykan": "https://flagcdn.com/va.svg",
+  "Afganistan": "https://flagcdn.com/af.svg",
+  "Japonia":"https://flagcdn.com/jp.svg",
+  "Katar":"https://flagcdn.com/qa.svg",
+  "Korea Południowa": "https://flagcdn.com/kr.svg",
+  "Korea Północna": "https://flagcdn.com/kp.svg",
+  "Nepal": "https://flagcdn.com/np.svg",
+  "Tajlandia": "https://flagcdn.com/th.svg",
+  "Brytyjskie Wyspy Dziewicze": "https://flagcdn.com/vg.svg",
+  "Grenada":"https://flagcdn.com/gd.svg",
+  "Kanada":"https://flagcdn.com/ca.svg",
+  "Meksyk":"https://flagcdn.com/mx.svg",
+  "Nikaragua":"https://flagcdn.com/ni.svg",
+  "Stany Zjednoczone":"https://flagcdn.com/us.svg",
+  "Wyspy Dziewicze Stanów Zjednoczonych":"https://flagcdn.com/vi.svg",
+  "Nowa Zelandia": "https://flagcdn.com/nz.svg",
+  "Argentyna":"https://flagcdn.com/ar.svg",
+  "Brazylia":"https://flagcdn.com/br.svg",
+  "Chile":"https://flagcdn.com/cl.svg",
+  "Reprezentacja Uchodźców": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Olympic_flag.svg"
+};
+
 async function preloadSheetData() {
   try {
     const res = await fetch(sheetUrl);
@@ -154,7 +206,7 @@ function renderMedalTable(data, sectionName) {
         return `
         <tr class="player-row" data-player="${row.player}">
           <td>${i + 1}</td>
-          <td>${row.country} (${row.player})</td>
+          <td>${countryFlags[row.country] ? `<img src="${countryFlags[row.country]}" width="30">`: ""} ${row.country} (${row.player})</td>
           <td>${row.gold}</td>
           <td>${row.silver}</td>
           <td>${row.bronze}</td>
@@ -165,7 +217,7 @@ function renderMedalTable(data, sectionName) {
             <div class="details-content">
               <ul>
                 ${sortedMedals.map(m => `
-                    <li><strong>${m.type.toUpperCase()}:</strong> ${m.competition}</li>
+                    <li class="${m.type.toUpperCase()}"><strong>${m.type.toUpperCase()}:</strong> ${m.competition}</li>
                   `).join("")}
               </ul>
             </div>
