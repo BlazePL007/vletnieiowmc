@@ -6,12 +6,51 @@ body{
     color:#333
 }
 
+html, body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#content {
+    flex: 1 0 auto; /* wypełnia wolną przestrzeń i spycha footer na dół */
+}
+
+footer {
+    flex-shrink: 0; /* footer nie kurczy się */
+}
+
 .header{
     background-color: #2c3e50;
     color: white;
     padding: 1em;
     text-align: center;
 }
+
+footer{
+    background-color: #2c3e50;
+    color: white;
+    padding: 1em;
+    text-align: center;
+}
+
+footer a {
+    color: #1abc9c;              /* jasny turkus – pasuje do ciemnego tła */
+    margin: 0 10px;
+    text-decoration: none;       /* usuwa podkreślenie */
+    font-weight: bold;
+    transition: color 0.3s ease; /* płynna animacja koloru */
+}
+
+footer a:hover {
+    color: #16f4d0;              /* jaśniejszy kolor po najechaniu */
+    text-decoration: underline;  /* można dodać podkreślenie przy hover */
+}
+
+footer a:visited {
+    color: #1abc9c;              /* ten sam kolor co normalnie, żeby nie znikało */
+}
+
 
 .header nav{
     margin-top: 0.5em;
