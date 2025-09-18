@@ -313,7 +313,7 @@ async function loadRecords(sheetUrl3) {
           jednostka
         }
       if(zawodnik)
-        records[`${Dyscyplina} ${konkurencja}`].zawodnicy.push(`${country}(${zawodnik})`)
+        records[`${Dyscyplina} ${konkurencja}`].zawodnicy.push(`${countryFlags[country] ? `<img src="${countryFlags[country]}" width="30">`: ""}${country}(${zawodnik})`)
 
       }
     });
