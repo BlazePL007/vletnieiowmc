@@ -4,6 +4,8 @@ const sheetUrl2 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50u
 
 const sheetUrl3 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50uLXxdeKPCZKJHmC2xRA2SD-sUxC_qtivRPhvX2JTYQvvyNZhZ4yYtpDHB-3KmcPEpy-DoWv/pubhtml/sheet?headers=false&gid=287910486';
 
+const sheetUrl4 = 'https://docs.google.com/spreadsheets/u/0/d/e/2PACX-1vQ5S2B50uLXxdeKPCZKJHmC2xRA2SD-sUxC_qtivRPhvX2JTYQvvyNZhZ4yYtpDHB-3KmcPEpy-DoWv/pubhtml/sheet?headers=false&gid=617580620';
+
 const countryFlags = {
   "Czad" :"https://flagcdn.com/td.svg",
   "Madagaskar":"https://flagcdn.com/mg.svg",
@@ -55,6 +57,33 @@ const countryFlags = {
   "Chile":"https://flagcdn.com/cl.svg",
   "Reprezentacja Uchodźców": "https://upload.wikimedia.org/wikipedia/commons/a/a7/Olympic_flag.svg"
 };
+
+const kalendarzDef = [
+  { dyscyplina: "Boks", sub:[]},
+  { dyscyplina: "Gimnastyka", sub:["Skoki", "Sportowa"]},
+  { dyscyplina: "Hokej na trawie", sub:[]},
+  { dyscyplina: "Jeździectwo", sub:[]},
+  { dyscyplina: "Kajakarstwo", sub:["Górskie", "Klasyczne"]},
+  { dyscyplina: "Kolarstwo", sub:["Górskie", "Torowe", "Szosowe"]},
+  { dyscyplina: "Lekkoatletyka", sub:[]},
+  { dyscyplina: "Łucznictwo", sub:[]},
+  { dyscyplina: "Pięciobój nowoczesny", sub:[]},
+  { dyscyplina: "Piłka nożna", sub:[]},
+  { dyscyplina: "Piłka wodna", sub: [] },
+  { dyscyplina: "Pływanie", sub: [] },
+  { dyscyplina: "Skoki do wody", sub: [] },
+  { dyscyplina: "Strzelectwo", sub: [] },
+  { dyscyplina: "Szermierka", sub: [] },
+  { dyscyplina: "Triathlon", sub: [] },
+  { dyscyplina: "Wioślarstwo", sub: [] },
+  { dyscyplina: "Zapasy", sub: [] },
+  { dyscyplina: "Żeglarstwo", sub: [] },
+  { dyscyplina: "Sporty wspinaczkowe", sub: [] },
+  { dyscyplina: "Bule", sub: [] },
+  { dyscyplina: "Karting", sub: [] },
+  { dyscyplina: "Sporty lotnicze", sub: [] },
+  { dyscyplina: "Futbol flagowy", sub: [] }
+];
 
 async function preloadSheetData() {
   try {
@@ -356,11 +385,286 @@ function renderRecordTable(data, sectionName) {
   cache[sectionName] = dom.body.innerHTML;
 }
 
+async function loadHarmonogram(sheetUrl4){
+  try{
+    const res = await fetch(sheetUrl4);
+    const htmlText = await res.text();
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+    
+    const rows = Array.from(doc.querySelectorAll('table tr'));
+    
+    let harmonogram = {}
+    let kalendarz = {}
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >=2){
+      let data = cells[0].textContent.trim();
+      let godzina = cells[1].textContent.trim();
+      let typ = cells[2].textContent.trim();
+      let sport = cells[3].textContent.trim();
+      let status = cells[4].textContent.trim();
+      let komentarz = cells[5].textContent.trim();
+
+      if(!harmonogram[data])
+        harmonogram[data] = {
+          data,
+          godzina,
+          sporty:[],
+          statusy:[],
+          komentarz
+        }
+      if(sport){
+        harmonogram[data].sporty.push(`${sport}`);
+        harmonogram[data].statusy.push(`${status}`);
+      }
+      if(typ==="ceremonia" || typ==="medal"){
+        if (!kalendarz["Ceremonie"]) kalendarz["Ceremonie"] = {}
+        kalendarz["Ceremonie"][data] = sport.includes("zamknięcia")?"Z" : sport.includes("otwarcia")? "O" : "M";
+      }
+      if(typ==="konkurencja"&&sport){
+        const isFinal = /\[f\]/i.test(status);
+
+        let main = sport;
+        let sub = null;
+        if(sport.startsWith("Kajakarstwo")) {
+          main = "Kajakarstwo";
+          sub = sport.split(' ')[1];
+          sub = sub.charAt(0).toUpperCase() + sub.slice(1);
+        }
+        if (sport.startsWith("Kolarstwo")) {
+          main = "Kolarstwo";
+          sub = sport.split(' ')[1];
+          sub = sub.charAt(0).toUpperCase() + sub.slice(1);
+        }
+        if (sport.startsWith("Gimnastyka")) {
+          main = "Gimnastyka";
+          sub = status.includes("skoki")? "Skoki" : "Sportowa";
+        }
+
+        if(!kalendarz[main]) kalendarz[main] = {};
+        if(!kalendarz[main][sub]) kalendarz[main][sub] = {}
+        if(!kalendarz[main][sub][data]) kalendarz[main][sub][data] = []
+
+        kalendarz[main][sub][data].push(isFinal ? "F" : "E");
+      }
+      }
+    });
+    console.log("Kalendarz:")
+    console.log(kalendarz);
+    renderHarmonogramlist(Object.values(harmonogram),"harmonogram");
+    renderCalender(kalendarz, "harmonogram");
+  }catch(error){
+    console.error("Błąd podczas wczytywania harmonogramu", error);
+  }
+}
+
+function renderHarmonogramlist(data, sectionName){
+  const dom = new DOMParser().parseFromString(cache[sectionName],"text/html");
+  const container = dom.getElementById("harmonogram");
+  container.innerHTML = "";
+
+  let tabela = `
+    ${data.map(row =>`
+        <div class="date">${row.data}${row.komentarz ? " - " + row.komentarz : ""}</div>
+        ${row.godzina ? `<p>${row.godzina}</p>` : ""}
+        <ul class="list">
+          ${row.sporty.map((sport, i) =>`
+            <li class="item">
+            <span class = "sport">${sport}</span>
+            ${row.statusy[i] ? `<span class="status">${row.statusy[i]}</span>`:""}
+            </li>
+            `).join("")}
+        </ul>
+      `).join("")}
+  `;
+  container.innerHTML = tabela;
+  cache[sectionName]=dom.body.innerHTML;
+}
+
+function renderCalender (data, sectionName){
+  const dom = new DOMParser().parseFromString(cache[sectionName],"text/html");
+  const container = dom.getElementById("kalendarz");
+  container.innerHTML = "";
+  let table = dom.createElement("table");
+  table.className = "kalendarz";
+  table.innerHTML += generowanie_Naglowka(data);
+  container.appendChild(table);
+  cache[sectionName] = dom.body.innerHTML;
+}
+
+function generowanie_Naglowka(data){
+
+  const months = {
+    "sierpnia": 8,
+    "września": 9,
+  };
+  const monthNames = {
+    8: "Sierpień",
+    9: "Wrzesień",
+  };
+  const days = ["Nd.", "Pn.", "Wt.", "Śr.", "Cz.", "Pt.", "Sb."];
+
+  // 1. zbieramy wszystkie daty
+  const allDates = JSON.stringify(data).match(/\d{1,2} \p{L}+/gu) || [];
+  // 2. unikalne i posortowane
+  const sortedDates = [...new Set(allDates)].sort((a, b) => {
+    const [dA, mA] = a.split(" ");
+    const [dB, mB] = b.split(" ");
+    return months[mA] - months[mB] || dA - dB;
+  });
+
+  // 3. grupowanie po miesiącach
+  const grouped = {};
+  sortedDates.forEach(date => {
+    const [day, month] = date.split(" ");
+    const monthNum = months[month];
+    if (!grouped[monthNum]) grouped[monthNum] = [];
+    grouped[monthNum].push(parseInt(day, 10));
+  });
+
+  // 4. pierwszy wiersz (nagłówek miesięcy)
+  let header1 = `<tr>
+    <th rowspan="2" colspan="2">`;
+    const usedMonths = Object.keys(grouped).map(m => monthNames[m]);
+    header1 += usedMonths.join("/ ") + " 2025</th>";
+  for (const [monthNum, daysArr] of Object.entries(grouped)) {
+    header1 += `<th colspan="${daysArr.length}">${monthNames[monthNum]}</th>`;
+  }
+  header1 += `<th rowspan="2">Konkurencje</th></tr>`;
+
+  // 5. drugi wiersz (dni z nazwami)
+  let header2 = "<tr>";
+  sortedDates.forEach(date => {
+    const [day, month] = date.split(" ");
+    const dateObj = new Date(2025, months[month] - 1, parseInt(day, 10));
+    const weekday = days[dateObj.getDay()];
+    header2 += `<th>${day}<br>${weekday}</th>`;
+  });
+  header2 += "</tr>";
+
+  const ceremonieClasses = {
+    "O": "otwarcie",
+    "M": "medale",
+    "Z": "zakonczenie",
+    "E": "zawody",
+    "F": "finaly"
+  };
+
+  let rowCeremonie = "<tr><td colspan='2'>Ceremonie</td>";
+
+  sortedDates.forEach(date => {
+    const typ = data.Ceremonie?.[date]; // np. "O", "M", "Z"
+    if (typ) {
+      rowCeremonie += `<td class="${ceremonieClasses[typ]}">${typ}</td>`;
+    } else {
+      rowCeremonie += "<td></td>";
+    }
+  });
+
+  rowCeremonie += "<td></td></tr>"; // ostatnia kolumna "Konkurencje"
+
+  let zawody="";
+  kalendarzDef.forEach(d => {
+    const dyscyplina = d.dyscyplina;
+    console.log(dyscyplina)
+    const suby = d.sub;
+    if (suby.length === 0) {
+      let allF = 0;
+      // zwykła dyscyplina - colspan 2
+      zawody += `<tr><td colspan="2">${dyscyplina}</td>`;
+        sortedDates.forEach(date =>{
+        const typ = data[dyscyplina]?.null[date]; // np. "O", "M", "Z"
+        console.log(typ);
+          if (typ) {
+            let fCount = 0;
+            if (Array.isArray(typ)) {
+              fCount = typ.filter(e => e === "F").length;
+              allF +=fCount
+            }
+            zawody += `<td class="${ceremonieClasses[typ[0]]}">${fCount>0?fCount:""}</td>`;
+          } else {
+            zawody += "<td></td>";
+          }}
+        ); // miejsca na E/F lub ceremonie itd.
+      zawody += `<td>${allF}</td></tr>`;
+    } else {
+      let totalF = 0;
+      suby.forEach(sub => {
+        sortedDates.forEach(date => {
+          const typ = data[dyscyplina]?.[sub]?.[date];
+          if (Array.isArray(typ)) totalF += typ.filter(e => e === "F").length;
+        });
+      });
+      // dyscyplina z subami - rowspan = liczba subów
+      suby.forEach((sub, i) => {
+        zawody += "<tr>";
+        if (i === 0) zawody += `<td rowspan="${suby.length}">${dyscyplina}</td>`;
+        zawody += `<td>${sub}</td>`;
+        sortedDates.forEach(date =>{
+        const typ = data[dyscyplina]?.[sub][date]; // np. "O", "M", "Z"
+          if (typ) {
+            let fCount = 0;
+            if (Array.isArray(typ)) {
+              fCount = typ.filter(e => e === "F").length;
+            }
+            zawody += `<td class="${ceremonieClasses[typ[0]]}">${fCount>0?fCount:""}</td>`;
+          } else {
+            zawody += "<td></td>";
+          }
+        }); // miejsca na wyniki
+        if (i === 0) zawody += `<td rowspan="${suby.length}">${totalF}</td>`;
+        zawody += "</tr>";
+      });
+    }
+  });
+
+  const dailySums = Array(sortedDates.length).fill(0);
+  let totalFAll = 0;
+
+  kalendarzDef.forEach(d => {
+    const dyscyplina = d.dyscyplina;
+    const suby = d.sub;
+
+    if (suby.length === 0) {
+      sortedDates.forEach((date, i) => {
+        const typ = data[dyscyplina]?.null[date];
+        let fCount = 0;
+        if (Array.isArray(typ)) fCount = typ.filter(e => e === "F").length;
+
+        dailySums[i] += fCount; // dodajemy do sumy dnia
+        totalFAll += fCount;    // dodajemy do sumy całkowitej
+      });
+    } else {
+      suby.forEach(sub => {
+        sortedDates.forEach((date, i) => {
+          const typ = data[dyscyplina]?.[sub]?.[date];
+          let fCount = 0;
+          if (Array.isArray(typ)) fCount = typ.filter(e => e === "F").length;
+
+          dailySums[i] += fCount;
+          totalFAll += fCount;
+        });
+      });
+    }
+  });
+
+  let rowSuma = '<tr><th colspan="2">Suma finałów</th>';
+  dailySums.forEach(sum => rowSuma += `<th>${sum}</th>`);
+  // ostatnia kolumna z sumą całkowitą
+  rowSuma += `<th colspan="2">${totalFAll}</th></tr>`;
+
+  return header1 + header2 + rowCeremonie + zawody + rowSuma;
+}
+
 async function init() {
   await preloadSections(["wstęp", "dyscypliny", "panstwa", "symbole", "medale", "rekordy", "obiekty", "harmonogram", "zaprzyjaźnieni"]);
   await preloadSheetData();
   await loadMedals(sheetUrl2);
   await loadRecords(sheetUrl3);
+  await loadHarmonogram(sheetUrl4);
   await loadSection("wstęp")
 }
 
